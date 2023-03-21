@@ -1,0 +1,31 @@
+---
+
+- name: Delete Tenant
+  hosts: campus
+  serial: True
+  vars_prompt:
+    - name: "tenant_id"
+      prompt: "Please input the tenant id that you want to delete "
+      private: no
+  tasks:
+    - name: check tenant_id is null
+      fail:
+        msg: "Delete Tenant fail! tenant_id is null"
+      when: tenant_id == ''
+    - name: Delete tenant "{{tenant_id}}"
+      tags: delete_tenant
+      uri:
+        url: 'https://{{north_ip}}:{{north_port}}/controller/campus/v1/baseservice/tenants/{{tenant_id}}'
+        method: DELETE
+        validate_certs: False
+        return_content: yes
+        headers:
+          X-ACCESS-TOKEN: "{{lookup('file','/tmp/ansible-temp')}}"
+          Accept: application/json
+          Content_Type: application/json
+        status_code: 204
+      register: tenant_result
+      ignore_errors: yes
+    - name: response from delete a tenant
+      debug:
+        msg: "{{tenant_result}}"

@@ -1,0 +1,33 @@
+---
+
+- name: Get Token
+  hosts: campus
+  serial: True
+  vars_prompt:
+    - name: "userName"
+      prompt: "Please input userName "
+      private: no
+    - name: "password"
+      prompt: "Please input password "
+      echo: no
+  tasks:
+    - name: get access token
+      tags: always
+      vars:
+        auth_user:
+          userName: '{{userName}}'
+          password: '{{password}}'
+      uri:
+        url: 'https://{{north_ip}}:{{north_port}}/controller/v2/tokens'
+        method: POST
+        body: '{{auth_user}}'
+        body_format: json
+        validate_certs: False
+        return_content: yes
+        headers:
+          Accept: application/json
+        status_code: 200
+      register: token_result
+    - local_action: copy content='{{token_result.json.data.token_id}}' dest="/tmp/ansible-temp"
+
+

@@ -1,0 +1,21 @@
+- name: Query Tenant
+  hosts: campus
+  serial: True
+  tasks:
+    - name: qeury tenants
+      tags: qeury_tenants
+      uri:
+        url: 'https://{{north_ip}}:{{north_port}}/controller/campus/v1/baseservice/tenants'
+        method: GET
+        validate_certs: False
+        return_content: yes
+        headers:
+          X-ACCESS-TOKEN: "{{lookup('file','/tmp/ansible-temp')}}"
+          Accept: application/json
+          Content_Type: application/json
+        status_code: 200
+      register: tenants_result
+      ignore_errors: yes
+    - name: response
+      debug:
+        msg: "{{tenants_result}}"
