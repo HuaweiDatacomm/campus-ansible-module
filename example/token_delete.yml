@@ -1,0 +1,24 @@
+- name: Delete Token
+  hosts: campus
+  serial: True
+  tasks:
+    - name: delete access token
+      tags: always
+      vars:
+        token_info:
+          token: "{{lookup('file','/tmp/ansible-temp')}}"
+      uri:
+        url: 'https://{{north_ip}}:{{north_port}}/controller/v2/tokens'
+        method: DELETE
+        body: '{{token_info}}'
+        body_format: json
+        validate_certs: False
+        return_content: yes
+        headers:
+          Accept: application/json
+        status_code: 200
+      register: token_result
+    - name: response from delete access token
+      tags: always
+      debug:
+        msg: "{{token_result.json}}"
