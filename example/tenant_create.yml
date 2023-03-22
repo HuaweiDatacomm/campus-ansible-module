@@ -1,0 +1,55 @@
+---
+
+- name: Create Tenant
+  hosts: campus
+  serial: True
+  vars:
+    now_time: "{{ansible_date_time.date}} {{ansible_date_time.time}}"
+  vars_prompt:
+    - name: "tenant_name"
+      prompt: "Please input tenant name "
+      private: no
+    - name: "user_account"
+      prompt: "Please input user account "
+      private: no
+    - name: "user_password"
+      prompt: "Please user password "
+      private: no
+  tasks:
+    - name: check tenant_name is null
+      fail:
+        msg: "Create Tenant fail! tenant_name is null"
+      when: tenant_name == ''
+    - name: user_account is null
+      fail:
+        msg: "Create Tenant fail! user_account is null"
+      when: user_account == ''
+	- name: user_password is null
+      fail:
+        msg: "Create Tenant fail! user_password is null"
+      when: user_password == ''  
+    - name: Create tenant "{{tenant_name}}"
+      tags: create_tenant
+      vars:
+        tenant_info:
+          tenantName: "{{tenant_name}}"
+          userAccount: "{{user_account}}"
+          userPassword: "{{user_password}}"
+        tenant_infos:
+          tenant: ["{{tenant_info}}"]
+      uri:
+        url: 'https://{{north_ip}}:{{north_port}}/controller/campus/v1/baseservice/tenants'
+        method: POST
+        body: '{{tenant_infos}}'
+        body_format: json
+        validate_certs: False
+        return_content: yes
+        headers:
+          X-ACCESS-TOKEN: "{{lookup('file','/tmp/ansible-temp')}}"
+          Accept: application/json
+          Content_Type: application/json
+        status_code: 204
+      register: tenant_result
+    - name: response from create tenant
+      debug:
+        msg: "{{tenant_result}}"
