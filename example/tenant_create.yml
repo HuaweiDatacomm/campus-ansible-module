@@ -2,7 +2,7 @@
 
 - name: Create Tenant
   hosts: campus
-  serial: True
+  serial: false
   vars:
     now_time: "{{ansible_date_time.date}} {{ansible_date_time.time}}"
   vars_prompt:
@@ -24,7 +24,7 @@
       fail:
         msg: "Create Tenant fail! user_account is null"
       when: user_account == ''
-	- name: user_password is null
+    - name: user_password is null
       fail:
         msg: "Create Tenant fail! user_password is null"
       when: user_password == ''  
@@ -40,7 +40,7 @@
       uri:
         url: 'https://{{north_ip}}:{{north_port}}/controller/campus/v1/baseservice/tenants'
         method: POST
-        body: '{{tenant_infos}}'
+        body: '{{tenant_info}}'
         body_format: json
         validate_certs: False
         return_content: yes
