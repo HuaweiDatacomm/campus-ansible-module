@@ -1,0 +1,39 @@
+---
+
+- name: Create site
+  hosts: campus
+  serial: true
+  vars:
+    now_time: "{{ansible_date_time.date}} {{ansible_date_time.time}}"
+  vars_prompt:
+    - name: "name"
+      prompt: "Please input tenant name "
+      private: no
+  tasks:
+    - name: check name is null
+      fail:
+        msg: "Create site fail! name is null"
+      when: name == ''
+    - name: Create site "{{name}}"
+      tags: create_site
+      vars:
+        site_info: 
+          name: "{{name}}"
+        site_infos: 
+          sites: ["{{site_info}}"]
+      uri:
+        url: 'https://{{north_ip}}:{{north_port}}/controller/campus/v3/sites'
+        method: POST
+        body: '{{site_infos}}'
+        body_format: json
+        validate_certs: False
+        return_content: yes
+        headers:
+          X-ACCESS-TOKEN: "{{lookup('file','/tmp/ansible-temp')}}"
+          Accept: application/json
+          Content_Type: application/json
+        status_code: 204
+      register: tenant_result
+    - name: response from create tenant
+      debug:
+        msg: "{{tenant_result}}"

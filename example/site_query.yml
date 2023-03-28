@@ -1,0 +1,21 @@
+- name: Query sites
+  hosts: campus
+  serial: True
+  tasks:
+    - name: qeury sites
+      tags: qeury_sites
+      uri:
+        url: 'https://{{north_ip}}:{{north_port}}/controller/campus/v3/sites'
+        method: GET
+        validate_certs: False
+        return_content: yes
+        headers:
+          X-ACCESS-TOKEN: "{{lookup('file','/tmp/ansible-temp')}}"
+          Accept: application/json
+          Content_Type: application/json
+        status_code: 200
+      register: sites_result
+      ignore_errors: yes
+    - name: response
+      debug:
+        msg: "{{sites_result}}"
